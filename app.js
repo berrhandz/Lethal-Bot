@@ -105,7 +105,6 @@ app.post(
 
       if (type === InteractionType.APPLICATION_COMMAND) {
         const name = data.name;
-        console.log(name)
 
         if (name === 'mute' || name === 'unmute') {
           const target = data.options && data.options[0] && data.options[0].value;
