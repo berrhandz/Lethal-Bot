@@ -81,7 +81,7 @@ app.use('/interactions', express.raw({ type: '*/*' }));
 // Minimal logger
 
 app.use((req, res, next) => {
-  console.log('-->', req.method, req.path);
+  console.log('-->', req.method, req.path, res);
   next();
 });
 
@@ -98,7 +98,7 @@ app.post(
   async (req, res) => {
     try {
       const { type, data, guild_id } = req.body;
-
+      console.log(data)
       if (type === InteractionType.PING) {
         return res.send({ type: InteractionResponseType.PONG });
       }
@@ -130,6 +130,7 @@ app.post(
                 data: { content: 'You must be in a voice channel to use this command without specifying a user.', flags: 64 },
               });
             }
+            console.log(`memberVoiceChannel: ${memberVoiceChannel}`)
 
             const channelMembers = guildMembers.get(memberVoiceChannel);
             const playingMembers = playingLethalCompany.get(guild_id) || new Set();

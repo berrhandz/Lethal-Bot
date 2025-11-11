@@ -23,7 +23,7 @@ const UNMUTE_COMMAND = {
       type: 6, // USER
       name: 'user',
       description: 'The user to unmute',
-      required: true,
+      required: false,
     },
   ],
 };
