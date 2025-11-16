@@ -13,7 +13,8 @@ const voiceChannelMembers = new Map();
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildPresences
   ]
 });
 //clear command cache
@@ -22,7 +23,6 @@ const client = new Client({
   console.log(`Bot ready ${client.user.tag}`)
   await client.application.commands.delete(''))
 })*/
-
 // Log any client errors
 client.on('error', error => {
   console.error('Discord client error:', error);
@@ -31,7 +31,18 @@ client.on('error', error => {
 client.once('ready', () => {
   console.log('Discord bot is ready!');
 });
+client.on('presenceUpdate', (oldPresence, newPresence) => {
+  if (newPresence) {
+    const currentlyPlaying = newPresence.activities[0].name
+    /*(if (currentlyPlaying == 'Hang Status') {
+      return;
+    } else {
+      console.log(currentlyPlaying)
+    }*/
 
+    console.log(newPresence.activities)
+  }
+})
 client.on('connection', connect => {
   console.log(`Conenction was made by ${connect}`)
 })
@@ -43,7 +54,6 @@ client.on('voiceStateUpdate', (oldState, newState) => {
   if (!voiceChannelMembers.has(guildId)) {
     voiceChannelMembers.set(guildId, new Map());
   }
-
   const guildVoiceMembers = voiceChannelMembers.get(guildId);
 
   // Remove from old channel
@@ -57,13 +67,13 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     }
   }
 
+  //access presence info
 
   // Add to new channel
   if (newState.channelId) {
     const channelMembers = guildVoiceMembers.get(newState.channelId) || new Set();
     channelMembers.add(userId);
     guildVoiceMembers.set(newState.channelId, channelMembers);
-    console.log(guildVoiceMembers)
   }
 });
 
@@ -80,10 +90,12 @@ app.use('/interactions', express.raw({ type: '*/*' }));
 
 // Minimal logger
 
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
   console.log('-->', req.method, req.path, res);
   next();
 });
+*/
+
 
 app.post(
   '/interactions',
@@ -98,7 +110,6 @@ app.post(
   async (req, res) => {
     try {
       const { type, data, guild_id } = req.body;
-      console.log(data)
       if (type === InteractionType.PING) {
         return res.send({ type: InteractionResponseType.PONG });
       }
@@ -108,7 +119,6 @@ app.post(
 
         if (name === 'mute' || name === 'unmute') {
           const target = data.options && data.options[0] && data.options[0].value;
-          console.log(target)
 
           // Handle muting entire voice channel if user is playing Lethal Company
           if (name === 'mute' && !target) {
@@ -130,7 +140,6 @@ app.post(
                 data: { content: 'You must be in a voice channel to use this command without specifying a user.', flags: 64 },
               });
             }
-            console.log(`memberVoiceChannel: ${memberVoiceChannel}`)
 
             const channelMembers = guildMembers.get(memberVoiceChannel);
             const playingMembers = playingLethalCompany.get(guild_id) || new Set();
